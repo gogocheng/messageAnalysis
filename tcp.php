@@ -23,7 +23,7 @@ $tcp_worker -> count = 8;
 $tcp_worker -> onWorkerStart = function ($worker) {
     // 将db实例存储在全局变量中(也可以存储在某类的静态成员中)
     global $db;
-    $db = new \Workerman\MySQL\Connection('119.23.106.133', '3306', 'root', 'root', 'monitoring');
+    $db = new \Workerman\MySQL\Connection('ip', 'port', 'user', 'password', 'db_name');
 };
 // 当客户端发来数据时
 $tcp_worker -> onMessage = function ($connection, $data) {
