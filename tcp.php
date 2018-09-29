@@ -35,34 +35,10 @@ $tcp_worker -> onMessage = function ($connection, $data) {
     $equipmentNumber = GetPositionMessage ::getEquipmentNumber($data16Array);
     //发送给客户端
     $sendClientData = GetAboutParameter ::getVerifyNumberArray($data16Array);
-    if ($data16Array[1] == "2" && $data16Array[2] == "0") {
-        //0200数据入库
-        $data0200Array = GetPositionMessage ::getMessageArray($data16Array, 13);
-        if (!empty($data0200Array['ship_id'])) {
-            // 将db实例存储在全局变量中(也可以存储在某类的静态成员中)
-            global $db;
-            // 执行SQL
-            $sql = "Insert into `cmf_locus` (ship_id,time,latitude,longitude,ns,position,ew,alarm,gps,log) 
-                  VALUES ("."'{$data0200Array['ship_id']}','{$data0200Array['time']}','{$data0200Array['latitude']}','{$data0200Array['longitude']}','{$data0200Array['ns']}','{$data0200Array['position']}','{$data0200Array['ew']}','{$data0200Array['alarm']}','{$data0200Array['gps']}','{$data0200Array['log']}')";
-            $data = $db -> query($sql);
-            var_dump($equipmentNumber);
-            var_dump($data16Array[1] . $data16Array[2] . "||" . $data0200Array['time']);
-        }
-
-    } else {
-        //0704数据包解析和入库
-        $data0704Array = GetPositionMessage ::getMessageArray($data16Array, 18);
-        if (!empty($data0704Array['ship_id'])) {
-            global $db;
-            // 执行SQL
-            $sql = "Insert into `cmf_locus` (ship_id,time,latitude,longitude,ns,position,ew,alarm,gps,log) 
-                  VALUES ("."'{$data0704Array['ship_id']}','{$data0704Array['time']}','{$data0704Array['latitude']}','{$data0704Array['longitude']}','{$data0704Array['ns']}','{$data0704Array['position']}','{$data0704Array['ew']}','{$data0704Array['alarm']}','{$data0704Array['gps']}','{$data0704Array['log']}')";
-            $data = $db -> query($sql);
-            var_dump($equipmentNumber);
-            var_dump($data16Array[1] . $data16Array[2] . "||" . $data0704Array['time']);
-        }
-
-    }
+    // 将db实例存储在全局变量中(也可以存储在某类的静态成员中)
+    global $db;
+    // 执行SQL
+    $data = $db -> query();
 
     // 向客户端发送hello $data
     $connection -> send($sendClientData);

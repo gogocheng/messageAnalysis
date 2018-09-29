@@ -142,28 +142,7 @@ class GetPositionMessage
         return $datetimeStr;
     }
 
-    /**
-     * description  获取船舶id
-     * @param $data array   16进制数组
-     * @return mixd  $shipId
-     * @throws \think\db\exception\DataNotFoundException
-     * @throws \think\db\exception\ModelNotFoundException
-     * @throws \think\exception\DbException
-     */
-    public static function getShipId ($data)
-    {
-        //设备号
-        $equipmentNumber = self ::getEquipmentNumber($data);
-        // 将db实例存储在全局变量中(也可以存储在某类的静态成员中)
-        global $db;
-        // 执行SQL
-        $data = $db -> select("id") -> from('cmf_ship') -> where("number = '$equipmentNumber'") -> query();
-        $shipId = "";
-        foreach($data as $key => $value){
-            $shipId = $value['id'];
-        }
-        return $shipId;
-    }
+
 
     /**
      * description  获取入库数组
