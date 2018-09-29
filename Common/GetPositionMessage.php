@@ -153,15 +153,15 @@ class GetPositionMessage
     public static function getShipId ($data)
     {
         //设备号
-//        $equipmentNumber = self ::getEquipmentNumber($data);
-        $equipmentNumber = 18603127991;
+        $equipmentNumber = self ::getEquipmentNumber($data);
         // 将db实例存储在全局变量中(也可以存储在某类的静态成员中)
         global $db;
         // 执行SQL
         $data = $db -> select("id") -> from('cmf_ship') -> where("number = '$equipmentNumber'") -> query();
-        var_dump($data[0]['id']);
-        die();
-        $shipId = $data[0]['id'];
+        $shipId = "";
+        foreach($data as $key => $value){
+            $shipId = $value['id'];
+        }
         return $shipId;
     }
 

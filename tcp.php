@@ -15,15 +15,15 @@ require 'Autoloader.php';
 require_once __DIR__ . '/vendor/autoload.php';
 
 // 创建一个Worker监听2347端口，不使用任何应用层协议
-$tcp_worker = new Worker("tcp://127.0.0.1:2400");
+$tcp_worker = new Worker("tcp://0.0.0.0:8992");
 
 // 启动10个进程对外提供服务
-$tcp_worker -> count = 10;
+$tcp_worker -> count = 8;
 
 $tcp_worker -> onWorkerStart = function ($worker) {
     // 将db实例存储在全局变量中(也可以存储在某类的静态成员中)
     global $db;
-    $db = new \Workerman\MySQL\Connection('127.0.0.1', '3306', 'root', 'root', 'monitoring');
+    $db = new \Workerman\MySQL\Connection('119.23.106.133', '3306', 'root', 'root', 'monitoring');
 };
 // 当客户端发来数据时
 $tcp_worker -> onMessage = function ($connection, $data) {
@@ -31,6 +31,8 @@ $tcp_worker -> onMessage = function ($connection, $data) {
     $data10Array = Auth ::get10Bytes($data);
     //转成16进制
     $data16Array = Auth ::getTo16Bytes($data10Array);
+    //设备号
+    $equipmentNumber = GetPositionMessage ::getEquipmentNumber($data16Array);
     //发送给客户端
     $sendClientData = GetAboutParameter ::getVerifyNumberArray($data16Array);
     if ($data16Array[1] == "2" && $data16Array[2] == "0") {
@@ -41,10 +43,12 @@ $tcp_worker -> onMessage = function ($connection, $data) {
             global $db;
             // 执行SQL
             $sql = "Insert into `cmf_locus` (ship_id,time,latitude,longitude,ns,position,ew,alarm,gps,log) 
-                  VALUES (" . "'{$data0200Array['ship_id']}','{$data0200Array['time']}','{$data0200Array['latitude']}','{$data0200Array['longitude']}','{$data0200Array['ns']}','{$data0200Array['position']}','{$data0200Array['ew']}','{$data0200Array['alarm']}','{$data0200Array['gps']}','{$data0200Array['log']}')";
+                  VALUES ("."'{$data0200Array['ship_id']}','{$data0200Array['time']}','{$data0200Array['latitude']}','{$data0200Array['longitude']}','{$data0200Array['ns']}','{$data0200Array['position']}','{$data0200Array['ew']}','{$data0200Array['alarm']}','{$data0200Array['gps']}','{$data0200Array['log']}')";
             $data = $db -> query($sql);
+            var_dump($equipmentNumber);
             var_dump($data16Array[1] . $data16Array[2] . "||" . $data0200Array['time']);
         }
+
     } else {
         //0704数据包解析和入库
         $data0704Array = GetPositionMessage ::getMessageArray($data16Array, 18);
@@ -54,6 +58,7 @@ $tcp_worker -> onMessage = function ($connection, $data) {
             $sql = "Insert into `cmf_locus` (ship_id,time,latitude,longitude,ns,position,ew,alarm,gps,log) 
                   VALUES ("."'{$data0704Array['ship_id']}','{$data0704Array['time']}','{$data0704Array['latitude']}','{$data0704Array['longitude']}','{$data0704Array['ns']}','{$data0704Array['position']}','{$data0704Array['ew']}','{$data0704Array['alarm']}','{$data0704Array['gps']}','{$data0704Array['log']}')";
             $data = $db -> query($sql);
+            var_dump($equipmentNumber);
             var_dump($data16Array[1] . $data16Array[2] . "||" . $data0704Array['time']);
         }
 
