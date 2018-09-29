@@ -27,6 +27,7 @@ class GetPositionMessage
             $equipmentArray[$j] = base_convert($equipmentArray[$j], 16, 10);
         }
         $equipmentNumber = Auth ::bcdToString($equipmentArray);
+        return $equipmentNumber;
     }
 
     /**
@@ -40,13 +41,13 @@ class GetPositionMessage
         $alarmArray = Auth ::getTwoStr(array_slice($data, $index, 4));
         if (substr($alarmArray, -8, 1) == 1) {
             //主电源电压低
-            $alarm = 1;
+            $alarm = "主电源电压低";
         } elseif (substr($alarmArray, -30, 1) == 1) {
             //碰撞预警
-            $alarm = 2;
+            $alarm = "碰撞预警";
         } elseif (substr($alarmArray, -31, 1) == 1) {
             //侧翻预警
-            $alarm = 3;
+            $alarm = "侧翻预警";
         }
 //        elseif (substr($alarmArray, -26, 1) == 1) {
 //            //脱落(光感)报警
@@ -54,7 +55,7 @@ class GetPositionMessage
 //        }
         else {
             //正常
-            $alarm = 0;
+            $alarm = "一切正常";
         }
         return $alarm;
     }
@@ -69,24 +70,24 @@ class GetPositionMessage
     {
         $positionArray = Auth ::getTwoStr(array_slice($data, $index + 4, 4));
         //判断是否定位，0定位，1未定位
-        $isPosition = substr($positionArray, -2, 1) == 0 ? $isPosition = 1 : $isPosition = 0;
+        $isPosition = substr($positionArray, -2, 1) == 0 ? $isPosition = "未定位" : $isPosition = "定位";
         //判断南北纬，0北纬，1南纬
-        $isNorSou = substr($positionArray, -3, 1) == 0 ? $isNorSou = 0 : $isNorSou = 1;
+        $isNorSou = substr($positionArray, -3, 1) == 0 ? $isNorSou = "北纬" : $isNorSou = "南纬";
         //判断东西经，0东经，1西经
-        $isEasWes = substr($positionArray, -4, 1) == 0 ? $isEasWes = 0 : $isEasWes = 1;
+        $isEasWes = substr($positionArray, -4, 1) == 0 ? $isEasWes = "东经" : $isEasWes = "西经";
         //判断定位方式
         if (substr($positionArray, -19, 1) == 1 && substr($positionArray, -20, 1) == 0) {
             //北斗定位
-            $positionMethod = 0;
+            $positionMethod = "北斗定位";
         } elseif (substr($positionArray, -19, 1) == 0 && substr($positionArray, -20, 1) == 1) {
             //GPS定位
-            $positionMethod = 1;
+            $positionMethod = "GPS定位";
         } elseif (substr($positionArray, -19, 1) == 1 && substr($positionArray, -20, 1) == 1) {
             //北斗GPS双定位
-            $positionMethod = 2;
+            $positionMethod = "北斗GPS双定位";
         } else {
             //北斗GPS都未定位
-            $positionMethod = 3;
+            $positionMethod = "北斗GPS都未定位";
         }
         $positionStatusArray = array (
             'position' => $isPosition,
@@ -152,11 +153,14 @@ class GetPositionMessage
     public static function getShipId ($data)
     {
         //设备号
-        $equipmentNumber = self ::getEquipmentNumber($data);
+//        $equipmentNumber = self ::getEquipmentNumber($data);
+        $equipmentNumber = 18603127991;
         // 将db实例存储在全局变量中(也可以存储在某类的静态成员中)
         global $db;
         // 执行SQL
-        $data = $db -> select("*") -> from('cmf_ship') -> where("number = $equipmentNumber") -> query();
+        $data = $db -> select("id") -> from('cmf_ship') -> where("number = '$equipmentNumber'") -> query();
+        var_dump($data[0]['id']);
+        die();
         $shipId = $data[0]['id'];
         return $shipId;
     }
@@ -175,7 +179,7 @@ class GetPositionMessage
         //位置信息数组
         $positionStatusArray = self ::getPositionStatus($data, $index);
         //船舶id
-        $reu['ship_id'] = self ::getShipId($data);
+        $shipId = self ::getShipId($data);
         //数据日志
         $log = implode(",", $data);
         //是否定位
@@ -194,12 +198,20 @@ class GetPositionMessage
         $latitude = self ::getLatitude($data, $index);
         //经度
         $longitude = self ::getLongitude($data, $index);
-        // 将db实例存储在全局变量中(也可以存储在某类的静态成员中)
-        global $db;
-        // 执行SQL
-        $data = $db -> query('insert into cmf_locus ');
-        $shipId = $data[0]['id'];
-        return $reu;
+
+        $positionArray = array (
+            'ship_id' => $shipId,
+            'time' => $time,
+            'latitude' => $latitude,
+            'longitude' => $longitude,
+            'ns' => $ns,
+            'position' => $position,
+            'ew' => $ew,
+            'alarm' => $alarm,
+            'gps' => $gps,
+            'log' => $log
+        );
+        return $positionArray;
     }
 
 }

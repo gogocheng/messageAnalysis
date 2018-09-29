@@ -23,7 +23,7 @@ class Auth
         $bytes = array ();
         $len = strlen($string);
         for ($i = 0; $i < $len; $i++) {
-            array_push($bytes,ord($string[$i]));
+            array_push($bytes, ord($string[$i]));
         }
         return $bytes;
     }
@@ -197,7 +197,8 @@ class Auth
     public static function getTwoStr ($data)
     {
         //转成2进制
-        $str = [];
+        $str = array ();
+        $req = array ();
         foreach ($data as $key => $value) {
             $str[$key] = base_convert($data[$key], 16, 2);
             $leng = 8 - strlen($str[$key]);
